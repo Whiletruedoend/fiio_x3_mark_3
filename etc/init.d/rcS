@@ -1,0 +1,49 @@
+#!/bin/sh
+
+# mount filesystems
+/bin/mount -t proc /proc /proc
+
+mount -o remount,rw relatime=1 /
+/bin/mount -t sysfs sysfs /sys
+/bin/mount -t tmpfs tmpfs /dev
+/bin/mount -t tmpfs tmpfs /var
+/bin/mount -t tmpfs tmpfs /tmp
+
+cp /etc /tmp -Rf
+/bin/mount -t tmpfs tmpfs /etc/
+cp /tmp/etc/* /etc -Rf
+
+
+/bin/mknod /dev/null c 1 3
+
+# create necessary devices
+/bin/mkdir /dev/pts
+/bin/mount -t devpts devpts /dev/pts
+/bin/mknod -m 666 /dev/tcsm c 238 73
+
+
+export PATH=/bin:/sbin:/usr/bin:/usr/sbin:/usr/jz_mips/bin/
+export LD_LIBRARY_PATH=/lib:/usr/local/directfb-prefix/lib:/usr/local/freetype-prefix/lib
+export ALSA_CONFIG_PATH=/usr/alsa/share/alsa.conf
+ulimit -n 819200
+
+mkdir /dev/snd
+ln -s /dev/pcmC0D0c /dev/snd/pcmC0D0c
+ln -s /dev/pcmC0D0p /dev/snd/pcmC0D0p
+ln -s /dev/pcmC0D1c /dev/snd/pcmC0D1c
+ln -s /dev/pcmC0D1p /dev/snd/pcmC0D1p
+ln -s /dev/controlC0 /dev/snd/controlC0 
+ln -s /dev/seq /dev/snd/seq
+ln -s /dev/timer /dev/snd/timer
+
+
+
+
+mkdir -p /var/run
+
+
+cd /usr/pv-project
+./fifo-audio-app &
+
+/usr/jz_mips/bin/udevd --daemon
+/usr/jz_mips/bin/udevstart
